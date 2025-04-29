@@ -23,8 +23,8 @@ public class FullLoanValueCalculationService : ICalculationService<CalculateFull
 
             decimal psk = calculationEvent.PaymentType.ToLower() switch
             {
-                "annuity" => await CalculateAnnuityPskAsync(calculationEvent, coefficient, cancellationToken),
-                "differentiated" => await CalculateDifferentiatedPskAsync(calculationEvent, coefficient, cancellationToken),
+                "аннуитет" => await CalculateAnnuityPskAsync(calculationEvent, coefficient, cancellationToken),
+                "дифф" => await CalculateDifferentiatedPskAsync(calculationEvent, coefficient, cancellationToken),
                 _ => throw new ArgumentException($"Неизвестный тип платежа: {calculationEvent.PaymentType}")
             };
 
