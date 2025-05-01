@@ -45,14 +45,10 @@ public class CalculateIndebtednessConsumer: BackgroundService
                 var jsonObject = JObject.Parse(result.Message.Value);
 
                 // Определяем тип события по наличию определенных свойств
-                if (jsonObject.Property("EventType").Value.ToString().Contains("CalculateFullLoanValueEvent"))
+                if (jsonObject.Property("EventType").Value.ToString().Contains("CalculateContractValuesEvent"))
                 {
-                    var @event = jsonObject.ToObject<CalculateFullLoanValueEvent>();
-                    if (@event != null) await ProcessCalculateFullLoanValueEventAsync(@event, stoppingToken);
-                }
-                else
-                {
-                    _logger.LogWarning("Неизвестный тип события: {Json}", result.Message.Value);
+                    var @event = jsonObject.ToObject<CalculateContractValuesEvent>();
+                    if (@event != null) await ProcessCalculateContractValuesEventAsync(@event, stoppingToken);
                 }
             }
         }
@@ -67,12 +63,12 @@ public class CalculateIndebtednessConsumer: BackgroundService
         }
     }
     
-    private async Task ProcessCalculateFullLoanValueEventAsync(CalculateFullLoanValueEvent @event, CancellationToken cancellationToken)
+    private async Task ProcessCalculateContractValuesEventAsync(CalculateContractValuesEvent @event, CancellationToken cancellationToken)
     {
         try
         {
             using var scope = _serviceProvider.CreateScope();
-            var handler = scope.ServiceProvider.GetRequiredService<IEventHandler<CalculateFullLoanValueEvent>>();
+            var handler = scope.ServiceProvider.GetRequiredService<IEventHandler<CalculateContractValuesEvent>>();
             await handler.HandleAsync(@event, cancellationToken);
         }
         catch (Exception ex)

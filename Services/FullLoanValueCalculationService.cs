@@ -2,7 +2,7 @@
 
 namespace Loans.Indebtedness.Services;
 
-public class FullLoanValueCalculationService : ICalculationService<CalculateFullLoanValueEvent>
+public class FullLoanValueCalculationService : ICalculationService<CalculateContractValuesEvent, decimal>
 {
     private readonly ILogger<FullLoanValueCalculationService> _logger;
 
@@ -11,7 +11,7 @@ public class FullLoanValueCalculationService : ICalculationService<CalculateFull
         _logger = logger;
     }
     
-    public async Task<decimal> CalculateAsync(CalculateFullLoanValueEvent calculationEvent, CancellationToken cancellationToken)
+    public async Task<decimal> CalculateAsync(CalculateContractValuesEvent calculationEvent, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Начало расчета ПСК для контракта {ContractId}", calculationEvent.ContractId);
 
@@ -43,14 +43,14 @@ public class FullLoanValueCalculationService : ICalculationService<CalculateFull
         }
     }
 
-    private async Task<decimal> CalculateAnnuityPskAsync(CalculateFullLoanValueEvent calculationEvent, decimal coefficient, CancellationToken cancellationToken)
+    private async Task<decimal> CalculateAnnuityPskAsync(CalculateContractValuesEvent calculationEvent, decimal coefficient, CancellationToken cancellationToken)
     {
         _logger.LogDebug("Расчет ПСК для аннуитетного типа платежа");
         await Task.Yield();
         return calculationEvent.InterestRate*coefficient;
     }
 
-    private async Task<decimal> CalculateDifferentiatedPskAsync(CalculateFullLoanValueEvent calculationEvent, decimal coefficient, CancellationToken cancellationToken)
+    private async Task<decimal> CalculateDifferentiatedPskAsync(CalculateContractValuesEvent calculationEvent, decimal coefficient, CancellationToken cancellationToken)
     {
         _logger.LogDebug("Расчет ПСК для дифференцированного типа платежа");
         await Task.Yield();

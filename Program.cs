@@ -2,15 +2,13 @@ using Loans.Indebtedness.Kafka;
 using Loans.Indebtedness.Kafka.Consumers;
 using Loans.Indebtedness.Kafka.Events;
 using Loans.Indebtedness.Kafka.Handlers;
-using Loans.Indebtedness.Mappers;
 using Loans.Indebtedness.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddAutoMapper(typeof(MappingProfile));
-
-builder.Services.AddScoped<IEventHandler<CalculateFullLoanValueEvent>, CalculateFullLoanValueHandler>();
-builder.Services.AddScoped<ICalculationService<CalculateFullLoanValueEvent>, FullLoanValueCalculationService>();
+builder.Services.AddScoped<IEventHandler<CalculateContractValuesEvent>, CalculateContractValuesHandler>();
+builder.Services.AddScoped<ICalculationService<CalculateContractValuesEvent, decimal>, FullLoanValueCalculationService>();
+builder.Services.AddScoped<ICalculationService<CalculateContractValuesEvent, ContractValuesCalculatedEvent>, LoanCalculationService>();
 
 builder.Services.AddHostedService<CalculateIndebtednessConsumer>();
 builder.Services.AddSingleton<KafkaProducerService>();

@@ -2,7 +2,7 @@
 
 namespace Loans.Indebtedness.Services;
 
-public interface ICalculationService<T>
+public interface ICalculationService<TRequest, TResult>
 {
-    Task<decimal> CalculateAsync(T calculationEvent, CancellationToken cancellationToken);
+    Task<TResult> CalculateAsync(TRequest request, CancellationToken cancellationToken);
 }

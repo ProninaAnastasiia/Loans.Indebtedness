@@ -1,5 +1,5 @@
 ﻿namespace Loans.Indebtedness.Kafka.Events;
 
-public record CalculateFullLoanValueEvent(
+public record CalculateContractValuesEvent(
     Guid ContractId, decimal LoanAmount, int LoanTermMonths, decimal InterestRate,
-    string PaymentType, decimal? InitialPaymentAmount, Guid OperationId) : EventBase;
+    string PaymentType, Guid OperationId) : EventBase;
