@@ -10,7 +10,7 @@ builder.Services.AddScoped<IEventHandler<CalculateContractValuesEvent>, Calculat
 builder.Services.AddScoped<ICalculationService<CalculateContractValuesEvent, decimal>, FullLoanValueCalculationService>();
 builder.Services.AddScoped<ICalculationService<CalculateContractValuesEvent, ContractValuesCalculatedEvent>, LoanCalculationService>();
 
-builder.Services.AddHostedService<CalculateIndebtednessConsumer>();
+builder.Services.AddHostedService<CalculateContractValuesConsumer>();
 builder.Services.AddSingleton<KafkaProducerService>();
 
 builder.Services.AddEndpointsApiExplorer();

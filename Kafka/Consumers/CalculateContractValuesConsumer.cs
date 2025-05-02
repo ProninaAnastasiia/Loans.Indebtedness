@@ -5,13 +5,13 @@ using Newtonsoft.Json.Linq;
 
 namespace Loans.Indebtedness.Kafka.Consumers;
 
-public class CalculateIndebtednessConsumer: BackgroundService
+public class CalculateContractValuesConsumer: BackgroundService
 {
     private readonly IConfiguration _configuration;
-    private readonly ILogger<CalculateIndebtednessConsumer> _logger;
+    private readonly ILogger<CalculateContractValuesConsumer> _logger;
     private readonly IServiceProvider _serviceProvider;
 
-    public CalculateIndebtednessConsumer(IConfiguration configuration, IServiceProvider serviceProvider, ILogger<CalculateIndebtednessConsumer> logger)
+    public CalculateContractValuesConsumer(IConfiguration configuration, IServiceProvider serviceProvider, ILogger<CalculateContractValuesConsumer> logger)
     {
         _configuration = configuration;
         _logger = logger;
@@ -29,7 +29,7 @@ public class CalculateIndebtednessConsumer: BackgroundService
         };
 
         using var consumer = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
-        consumer.Subscribe(_configuration["Kafka:Topics:CalculateIndebtedness"]);
+        consumer.Subscribe(_configuration["Kafka:Topics:CalculateContractValues"]);
 
         _logger.LogInformation("KafkaConsumerService CalculateIndebtednessConsumer запущен.");
         
@@ -40,13 +40,12 @@ public class CalculateIndebtednessConsumer: BackgroundService
                 var result = consumer.Consume(stoppingToken);
                 if (result == null) continue;
 
-                _logger.LogInformation("Получено сообщение из Kafka: {Message}", result.Message.Value);
-
                 var jsonObject = JObject.Parse(result.Message.Value);
 
                 // Определяем тип события по наличию определенных свойств
                 if (jsonObject.Property("EventType").Value.ToString().Contains("CalculateContractValuesEvent"))
                 {
+                    _logger.LogInformation("Получено сообщение из Kafka: {Message}", result.Message.Value);
                     var @event = jsonObject.ToObject<CalculateContractValuesEvent>();
                     if (@event != null) await ProcessCalculateContractValuesEventAsync(@event, stoppingToken);
                 }

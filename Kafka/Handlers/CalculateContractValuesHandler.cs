@@ -12,7 +12,7 @@ public class CalculateContractValuesHandler: IEventHandler<CalculateContractValu
     private readonly IConfiguration _config;
     private KafkaProducerService _producer;
     
-    public CalculateContractValuesHandler(ICalculationService<CalculateContractValuesEvent, ContractValuesCalculatedEvent> calculationService, ILogger<CalculateContractValuesHandler> logger, IMapper mapper,IConfiguration config, KafkaProducerService producer)
+    public CalculateContractValuesHandler(ICalculationService<CalculateContractValuesEvent, ContractValuesCalculatedEvent> calculationService, ILogger<CalculateContractValuesHandler> logger, IConfiguration config, KafkaProducerService producer)
     {
         _logger = logger;
         _calculationService = calculationService;
@@ -26,14 +26,14 @@ public class CalculateContractValuesHandler: IEventHandler<CalculateContractValu
         {
             var @event = await _calculationService.CalculateAsync(calculationEvent, cancellationToken);
             var jsonMessage = JsonConvert.SerializeObject(@event);
-            var topic = _config["Kafka:Topics:CalculateIndebtedness"];
+            var topic = _config["Kafka:Topics:CalculateContractValues"];
     
             await _producer.PublishAsync(topic, jsonMessage);
             
         }
         catch (Exception e)
         {
-            _logger.LogError("Failed to handle CalculateContractValuesEvent. ContractId: {ContractId} OperationId: {OperationId}", calculationEvent.ContractId, calculationEvent.OperationId);
+            _logger.LogError("Failed to handle CalculateContractValuesEvent. ContractId: {ContractId} OperationId: {OperationId}. Exception: {e}", calculationEvent.ContractId , calculationEvent.OperationId, e.Message);
         }
     }
 }
