@@ -3,6 +3,7 @@ using Loans.Indebtedness.Kafka.Consumers;
 using Loans.Indebtedness.Kafka.Events;
 using Loans.Indebtedness.Kafka.Handlers;
 using Loans.Indebtedness.Services;
+using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
+
+// Метрики HTTP
+app.UseHttpMetrics(); 
+
+// Экспонирование метрик на /metrics
+app.MapMetrics();
 
 app.Run();
