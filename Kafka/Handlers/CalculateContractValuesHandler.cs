@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Loans.Indebtedness.Kafka.Handlers;
 
-public class CalculateContractValuesHandler: IEventHandler<CalculateContractValuesEvent>
+public class CalculateContractValuesHandler : IEventHandler<CalculateContractValuesEvent>
 {
     private readonly ILogger<CalculateContractValuesHandler> _logger;
     private readonly ICalculationService<CalculateContractValuesEvent, ContractValuesCalculatedEvent> _calculationService;

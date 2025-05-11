@@ -5,60 +5,25 @@ using Newtonsoft.Json.Linq;
 
 namespace Loans.Indebtedness.Kafka.Consumers;
 
-public class CalculateContractValuesConsumer: BackgroundService
+public class CalculateContractValuesConsumer: KafkaBackgroundConsumer
 {
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<CalculateContractValuesConsumer> _logger;
-    private readonly IServiceProvider _serviceProvider;
+    public CalculateContractValuesConsumer(
+        IConfiguration config,
+        IServiceProvider serviceProvider,
+        ILogger<CalculateContractValuesConsumer> logger)
+        : base(config, serviceProvider, logger,
+            topic: config["Kafka:Topics:CalculateContractValues"],
+            groupId: "indebtedness-service-group",
+            consumerName: nameof(CalculateContractValuesConsumer)) { }
 
-    public CalculateContractValuesConsumer(IConfiguration configuration, IServiceProvider serviceProvider, ILogger<CalculateContractValuesConsumer> logger)
+    protected override async Task HandleMessageAsync(JObject message, CancellationToken cancellationToken)
     {
-        _configuration = configuration;
-        _logger = logger;
-        _serviceProvider = serviceProvider;
-    }
+        var eventType = message["EventType"]?.ToString();
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        await Task.Delay(3000, stoppingToken); // дать приложению прогрузиться
-        var consumerConfig = new ConsumerConfig
+        if (eventType?.Contains("CalculateContractValuesEvent") == true)
         {
-            BootstrapServers = _configuration["Kafka:BootstrapServers"],
-            GroupId = "indebtedness-service-group",
-            AutoOffsetReset = AutoOffsetReset.Earliest
-        };
-
-        using var consumer = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
-        consumer.Subscribe(_configuration["Kafka:Topics:CalculateContractValues"]);
-
-        _logger.LogInformation("KafkaConsumerService CalculateIndebtednessConsumer запущен.");
-        
-        try
-        {
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                var result = consumer.Consume(stoppingToken);
-                if (result == null) continue;
-
-                var jsonObject = JObject.Parse(result.Message.Value);
-
-                // Определяем тип события по наличию определенных свойств
-                if (jsonObject.Property("EventType").Value.ToString().Contains("CalculateContractValuesEvent"))
-                {
-                    _logger.LogInformation("Получено сообщение из Kafka: {Message}", result.Message.Value);
-                    var @event = jsonObject.ToObject<CalculateContractValuesEvent>();
-                    if (@event != null) await ProcessCalculateContractValuesEventAsync(@event, stoppingToken);
-                }
-            }
-        }
-        catch (KafkaException ex)
-        {
-            _logger.LogError(ex, "Kafka временно недоступна или ошибка получения сообщения.");
-            await Task.Delay(1000, stoppingToken); // Ждем и пытаемся снова
-        }
-        finally
-        {
-            consumer.Close();
+            var @event = message.ToObject<CalculateContractValuesEvent>();
+            if (@event != null) await ProcessCalculateContractValuesEventAsync(@event, cancellationToken);
         }
     }
     
@@ -66,13 +31,13 @@ public class CalculateContractValuesConsumer: BackgroundService
     {
         try
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = ServiceProvider.CreateScope();
             var handler = scope.ServiceProvider.GetRequiredService<IEventHandler<CalculateContractValuesEvent>>();
             await handler.HandleAsync(@event, cancellationToken);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Ошибка при обработке события: {EventId}, {OperationId}", @event.EventId, @event.OperationId);
+            _logger.LogError(ex, "Ошибка при обработке события CalculateContractValuesEvent: {EventId}, {OperationId}", @event.EventId, @event.OperationId);
             // Тут можно реализовать retry или логирование в dead-letter-topic
         }
     }

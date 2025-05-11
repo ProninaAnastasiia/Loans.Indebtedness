@@ -13,13 +13,10 @@ public class FullLoanValueCalculationService : ICalculationService<CalculateCont
     
     public async Task<decimal> CalculateAsync(CalculateContractValuesEvent calculationEvent, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Начало расчета ПСК для контракта {ContractId}", calculationEvent.ContractId);
-
         try
         {
             // Имитация сложного расчета с помощью коэффициента
             var coefficient = await GenerateRandomCoefficient(cancellationToken);
-            _logger.LogInformation("Имитация сложного расчета с коэффициентом {Coefficient}", coefficient);
 
             decimal psk = calculationEvent.PaymentType.ToLower() switch
             {
@@ -28,17 +25,16 @@ public class FullLoanValueCalculationService : ICalculationService<CalculateCont
                 _ => throw new ArgumentException($"Неизвестный тип платежа: {calculationEvent.PaymentType}")
             };
 
-            _logger.LogInformation("ПСК для контракта {ContractId} рассчитана: {Psk}", calculationEvent.ContractId, psk);
             return psk;
         }
         catch (TaskCanceledException)
         {
-            _logger.LogWarning("Расчет ПСК для контракта {ContractId} отменен", calculationEvent.ContractId);
+            _logger.LogWarning("Расчет ПСК по операции {OperationId} отменен", calculationEvent.OperationId);
             throw;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Ошибка при расчете ПСК для контракта {ContractId}", calculationEvent.ContractId);
+            _logger.LogError(ex, "Ошибка при расчете ПСК для контракта {OperationId}", calculationEvent.OperationId);
             throw;
         }
     }
